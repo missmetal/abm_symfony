@@ -50,8 +50,9 @@ class DefaultController extends Controller
             $bd = $this->getDoctrine()->getManager();
             $bd->persist($nueva);
             $bd->flush();
+            $empresas= $this->getDoctrine()->getRepository('EmpresasBundle:Empresas')->findAll();
 
-            return $this->redirectToRoute('/lista');
+            return $this->render('EmpresasBundle:Default:index.html.twig',array('empresas' =>$empresas));
             
         }
 
@@ -62,9 +63,15 @@ class DefaultController extends Controller
     /**
      * @Route("/lista/eliminar/{id}")
      */
-    public function eliminarAction($id,Request $request)
+    public function eliminarAction($id)
     {
-        return $this->render('EmpresasBundle:Default:eliminar.html.twig');
+        $bd= $this->getDoctrine()->getManager();
+        $empresa= $bd->getRepository('EmpresasBundle:Empresas')->find($id);
+        $bd->remove($empresa);
+        $bd->flush();
+         $empresas= $this->getDoctrine()->getRepository('EmpresasBundle:Empresas')->findAll();
+        return $this->render('EmpresasBundle:Default:index.html.twig',array('empresas' =>$empresas));
+       
     }
     /**
      * @Route("/lista/editar/{id}")
@@ -100,8 +107,9 @@ class DefaultController extends Controller
             
            
             $bd->flush();
+            $empresas= $this->getDoctrine()->getRepository('EmpresasBundle:Empresas')->findAll();
 
-            return $this->redirectToRoute('/lista');
+            return $this->render('EmpresasBundle:Default:index.html.twig',array('empresas' =>$empresas));
         }
         return $this->render('EmpresasBundle:Default:editar.html.twig',array('formulario' =>$formulario->createView()));
     }
