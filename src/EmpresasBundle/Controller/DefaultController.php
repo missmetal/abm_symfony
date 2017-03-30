@@ -4,11 +4,18 @@ namespace EmpresasBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\Request;
+use EmpresasBundle\Entity\Empresas;
+
+
 
 class DefaultController extends Controller
 {
     /**
-     * @Route("/")
+     * @Route("/lista")
      */
     public function indexAction()
     {
@@ -18,25 +25,52 @@ class DefaultController extends Controller
  
 
     /**
-     * @Route("/agregar")
+     * @Route("/lista/agregar")
      */
     public function agregarAction(Request $request)
     {
-        return $this->render('abm/agregar.html.twig');
+        $nueva= new Empresas;
+        $formulario= $this->createFormBuilder($nueva)
+                ->add('cuit', NumberType::class, array('attr' =>array('class' =>'form-control')))
+                ->add('nombre', TextType::class, array('attr' =>array('class' =>'form-control')))
+                ->add('cantEmpleados', NumberType::class, array('attr' =>array('class' =>'form-control')))
+                ->add('guardar', SubmitType::class, array('label'=>'Guardar','attr' =>array('class' =>'btn btn-info')))
+                ->getForm();
+        $formulario->handleRequest($request);
+        if($formulario->isSubmitted() && $formulario->isValid())
+        {
+            $cuit= $formulario['cuit']->getData();
+            $nombre= $formulario['nombre']->getData();
+            $cantEmpleados= $formulario['cantEmpleados']->getData();
+
+            $nueva->setCuit($cuit);
+            $nueva->setNombre($nombre);
+            $nueva->setCantEmpleados($cantEmpleados);
+
+            $bd = $this->getDoctrine()->getManager();
+            $bd->persist($nueva);
+            $bd->flush();
+
+            return $this->redirectToRoute('/lista');
+            
+        }
+
+
+        return $this->render('EmpresasBundle:Default:agregar.html.twig', array('formulario' =>$formulario->createView()));
     }
 
     /**
-     * @Route("/eliminar/{id}")
+     * @Route("/lista/eliminar/{id}")
      */
     public function eliminarAction($id,Request $request)
     {
-        return $this->render('abm/eliminar.html.twig');
+        return $this->render('EmpresasBundle:Default:eliminar.html.twig');
     }
     /**
-     * @Route("/editar/{id}")
+     * @Route("/lista/editar/{id}")
      */
     public function editarAction($id,Request $request)
     {
-        return $this->render('abm/editar.html.twig');
+        return $this->render('EmpresasBundle:Default:editar.html.twig');
     }
 }
