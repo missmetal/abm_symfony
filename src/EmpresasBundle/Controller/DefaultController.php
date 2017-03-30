@@ -71,6 +71,38 @@ class DefaultController extends Controller
      */
     public function editarAction($id,Request $request)
     {
-        return $this->render('EmpresasBundle:Default:editar.html.twig');
+        $empresa= $this->getDoctrine()->getRepository('EmpresasBundle:Empresas')->find($id);
+
+        $empresa->setCuit($empresa->getCuit());
+            $empresa->setNombre($empresa->getNombre());
+            $empresa->setCantEmpleados($empresa->getCantEmpleados());
+
+        $formulario= $this->createFormBuilder($empresa)
+                ->add('cuit', NumberType::class, array('attr' =>array('class' =>'form-control')))
+                ->add('nombre', TextType::class, array('attr' =>array('class' =>'form-control')))
+                ->add('cantEmpleados', NumberType::class, array('attr' =>array('class' =>'form-control')))
+                ->add('guardar', SubmitType::class, array('label'=>'Guardar','attr' =>array('class' =>'btn btn-info')))
+                ->getForm();
+        $formulario->handleRequest($request);
+        if($formulario->isSubmitted() && $formulario->isValid())
+        {
+            $cuit= $formulario['cuit']->getData();
+            $nombre= $formulario['nombre']->getData();
+            $cantEmpleados= $formulario['cantEmpleados']->getData();
+
+            $bd = $this->getDoctrine()->getManager();
+            $empresa= $bd->getRepository('EmpresasBundle:Empresas')->find($id);
+
+            $empresa->setCuit($cuit);
+            $empresa->setNombre($nombre);
+            $empresa->setCantEmpleados($cantEmpleados);
+
+            
+           
+            $bd->flush();
+
+            return $this->redirectToRoute('/lista');
+        }
+        return $this->render('EmpresasBundle:Default:editar.html.twig',array('formulario' =>$formulario->createView()));
     }
 }
