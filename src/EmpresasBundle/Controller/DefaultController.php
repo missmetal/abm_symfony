@@ -9,6 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use EmpresasBundle\Entity\Empresas;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 
 
@@ -19,8 +21,29 @@ class DefaultController extends Controller
      */
     public function indexAction()
     {
-        $empresas= $this->getDoctrine()->getRepository('EmpresasBundle:Empresas')->findAll();
+        $empresas= $this->getDoctrine()->getRepository('EmpresasBundle:Empresas')->findAll();        
         return $this->render('EmpresasBundle:Default:index.html.twig', array('empresas' =>$empresas));
+    }
+
+      /**
+     * @Route("/lista/listJson")
+     * @Method("GET")
+     */
+    public function jsonListAction()
+    {
+        $empresas= $this->getDoctrine()->getRepository('EmpresasBundle:Empresas')->findAll();
+        $response = [];
+        foreach ($empresas as $k=> $item) {
+            $response[$k] =[
+               'id' => $item->getId(),
+               'cuit' =>$item->getCuit(),
+               'nombre' => $item->getNombre(),
+               'cantEmpleados' => $item->getCantEmpleados()
+            ];
+        }
+
+       
+        return new JsonResponse($response);
     }
  
 
